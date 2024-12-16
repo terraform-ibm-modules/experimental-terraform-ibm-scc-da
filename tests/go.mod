@@ -1,4 +1,4 @@
-module github.com/terraform-ibm-modules/terraform-ibm-scc-da
+module github.com/terraform-ibm-modules/experimental-terraform-ibm-scc-da
 
 go 1.22.4
 
