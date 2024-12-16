@@ -1,6 +1,10 @@
-# Security and Compliance Center solution
+# EXPERIMENTAL - Security and Compliance Center solution
 
-[![Stable (With quality checks)](https://img.shields.io/badge/Status-Stable%20(With%20quality%20checks)-green)](https://terraform-ibm-modules.github.io/documentation/#/badge-status)
+> ⚠️ **Warning**
+> Go to https://github.com/terraform-ibm-modules/terraform-ibm-scc-da for the released graduated version of this module.
+> This repository is used for experimental features.
+
+[![Implemented (No quality checks)](https://img.shields.io/badge/Status-Implemented%20(No%20quality%20checks)-yellowgreen)](https://terraform-ibm-modules.github.io/documentation/#/badge-status)
 [![latest release](https://img.shields.io/github/v/release/terraform-ibm-modules/terraform-ibm-scc-da?logo=GitHub&sort=semver)](https://github.com/terraform-ibm-modules/terraform-ibm-scc-da/releases/latest)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
