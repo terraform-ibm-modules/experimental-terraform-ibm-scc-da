@@ -419,6 +419,9 @@
                 "standard"
               ],
               "catalog_id": "7a4d68b4-cf8b-40cd-a3d1-f49aff526eb3",
+              "ignore_auto_referencing": [
+                "*"
+              ],
               "input_mapping": [
                 {
                   "dependency_output": "kms_instance_crn",
@@ -432,7 +435,7 @@
               ],
               "optional": true,
               "on_by_default": true,
-              "version": "^1.0.1"
+              "version": "^1.0.6"
             },
             {
               "name": "deploy-arch-ibm-account-infra-base",
@@ -441,6 +444,9 @@
                 "standard"
               ],
               "id": "63641cec-6093-4b4f-b7b0-98d2f4185cd6-global",
+              "ignore_auto_referencing": [
+                "*"
+              ],
               "input_mapping": [
                 {
                   "dependency_output": "audit_resource_group_name",
@@ -453,7 +459,7 @@
               ],
               "optional": true,
               "on_by_default": true,
-              "version": "^1.11.6"
+              "version": "^v1.18.0"
             },
             {
               "name": "testing-deploy-arch-ibm-event-notifications",
@@ -462,6 +468,9 @@
                 "standard"
               ],
               "id": "1f6f1af5-185e-4ae7-9b42-4c64e42728f6-global",
+              "ignore_auto_referencing": [
+                "*"
+              ],
               "input_mapping": [
                 {
                   "dependency_output": "crn",
@@ -475,7 +484,7 @@
               ],
               "optional": true,
               "on_by_default": true,
-              "version": "^1.0.1"
+              "version": "^1.0.8"
             },
             {
               "name": "testing-deploy-arch-ibm-observability",
@@ -484,18 +493,23 @@
               ],
               "id": "daf2cf91-2384-4205-b7f4-621299a4896d-global",
               "catalog_id": "7a4d68b4-cf8b-40cd-a3d1-f49aff526eb3",
-              "input_mapping": [{
-                "dependency_output": "cloud_monitoring_crn",
-                "version_input": "existing_monitoring_crn"
-              },
-              {
-                "dependency_input": "region",
-                "version_input": "scc_region",
-                "reference_version": true
-              }],
+              "ignore_auto_referencing": [
+                "*"
+              ],
+              "input_mapping": [
+                {
+                  "dependency_output": "cloud_monitoring_crn",
+                  "version_input": "existing_monitoring_crn"
+                },
+                {
+                  "dependency_input": "region",
+                  "version_input": "scc_region",
+                  "reference_version": true
+                }
+              ],
               "optional": true,
               "on_by_default": true,
-              "version": "^1.0.7"
+              "version": "^1.2.2"
             }
           ],
           "dependency_version_2": true
