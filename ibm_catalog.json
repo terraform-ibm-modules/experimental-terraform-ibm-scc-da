@@ -480,6 +480,11 @@
                   "dependency_input": "region",
                   "version_input": "scc_region",
                   "reference_version": true
+                },
+                {
+                  "dependency_input": "prefix",
+                  "version_input": "prefix",
+                  "reference_version": true
                 }
               ],
               "optional": true,
