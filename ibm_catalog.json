@@ -347,7 +347,7 @@
               "required": false
             },
             {
-              "key": "existing_activity_tracker_crn",
+              "key": "ibmcloud_kms_api_key",
               "required": false
             },
             {
@@ -360,6 +360,10 @@
             },
             {
               "key": "scc_en_reply_to_email",
+              "required": false
+            },
+            {
+              "key": "cbr_rules",
               "required": false
             }
           ],
@@ -500,7 +504,7 @@
             }
           ],
           "dependency_version_2": true
-        }
+          }
       ]
     }
   ]
