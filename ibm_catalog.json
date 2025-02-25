@@ -275,6 +275,10 @@
               "required": false
             },
             {
+              "key": "en_source_description",
+              "required": false
+            },
+            {
               "key": "scc_instance_tags",
               "required": false
             },
