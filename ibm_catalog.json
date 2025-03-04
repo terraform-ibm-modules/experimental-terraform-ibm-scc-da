@@ -456,8 +456,7 @@
               "input_mapping": [
                 {
                   "dependency_output": "audit_resource_group_name",
-                  "version_input": "resource_group_name",
-                  "reference_version": true
+                  "version_input": "resource_group_name"
                 },
                 {
                   "version_input": "use_existing_resource_group",
