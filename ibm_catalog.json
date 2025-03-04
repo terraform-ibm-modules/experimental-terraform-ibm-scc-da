@@ -434,6 +434,11 @@
                   "version_input": "existing_kms_instance_crn"
                 },
                 {
+                  "dependency_input": "prefix",
+                  "version_input": "prefix",
+                  "reference_version": true
+                },
+                {
                   "dependency_input": "region",
                   "version_input": "scc_region",
                   "reference_version": true
@@ -488,6 +493,11 @@
                   "dependency_input": "region",
                   "version_input": "scc_region",
                   "reference_version": true
+                },
+                {
+                  "dependency_input": "prefix",
+                  "version_input": "prefix",
+                  "reference_version": true
                 }
               ],
               "optional": true,
@@ -509,6 +519,11 @@
                 {
                   "dependency_input": "region",
                   "version_input": "scc_region",
+                  "reference_version": true
+                },
+                {
+                  "dependency_input": "prefix",
+                  "version_input": "prefix",
                   "reference_version": true
                 }
               ],
