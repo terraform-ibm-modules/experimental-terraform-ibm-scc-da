@@ -90,7 +90,7 @@
             {
               "key": "prefix",
               "required": true,
-              "description": "The prefix to add to all resources that this solution creates. To not use any prefix value, you can enter the string `__NULL__`."
+              "description": "The prefix to add to all resources that this solution creates (e.g `prod`, `test`, `dev`). To not use any prefix value, you can enter the string `__NULL__`."
             },
             {
               "key": "existing_monitoring_crn",
@@ -428,6 +428,9 @@
                 "standard"
               ],
               "catalog_id": "7a4d68b4-cf8b-40cd-a3d1-f49aff526eb3",
+              "ignore_auto_referencing": [
+                "*"
+              ],
               "input_mapping": [
                 {
                   "dependency_output": "kms_instance_crn",
@@ -500,6 +503,9 @@
                   "reference_version": true
                 }
               ],
+              "ignore_auto_referencing": [
+                "*"
+              ],
               "optional": true,
               "on_by_default": true,
               "version": "^1.0.8"
@@ -526,6 +532,9 @@
                   "version_input": "prefix",
                   "reference_version": true
                 }
+              ],
+              "ignore_auto_referencing": [
+                "*"
               ],
               "optional": true,
               "on_by_default": true,
