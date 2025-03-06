@@ -3,8 +3,8 @@ apiVersion: v1
 offerings:
   - name: testing-deploy-arch-ibm-scc
     kind: solution
-    catalog_id: 7df1e4ca-d54c-4fd0-82ce-3d13247308cd
-    offering_id: 9423f9bc-1290-4c71-a9ac-01898bfa7ccc
+    catalog_id: f64499c8-eb50-4985-bf91-29f9e605a433
+    offering_id: b773b1d4-69bb-48db-a657-2307015eb9c1
     variations:
       - name: instances
         mark_ready: true
@@ -12,8 +12,3 @@ offerings:
         scc:
           instance_id: 1c7d5f78-9262-44c3-b779-b28fe4d88c37
           region: us-south
-      - name: agents
-        mark_ready: true
-        install_type: extension
-        pre_validation: "tests/scripts/pre-validation-deploy-slz-roks-and-scc-wp-instances.sh"
-        post_validation: "tests/scripts/post-validation-destroy-slz-roks-and-scc-wp-instances.sh"

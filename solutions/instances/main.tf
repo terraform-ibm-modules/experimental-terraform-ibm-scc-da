@@ -8,6 +8,8 @@ locals {
   # tflint-ignore: terraform_unused_declarations
   validate_cos_inputs = var.existing_scc_cos_bucket_name != null && var.existing_scc_cos_kms_key_crn != null ? tobool("A value should not be passed for 'existing_scc_cos_kms_key_crn' when passing a value for 'existing_scc_cos_bucket_name'. A key is only needed when creating a new COS bucket.") : true
   # tflint-ignore: terraform_unused_declarations
+  validate_more_cos_inputs = var.existing_scc_cos_bucket_name != null && var.existing_cos_instance_crn == null ? tobool("A value for 'existing_cos_instance_crn' must be passed if 'existing_scc_cos_bucket_name' is passed in.") : true
+  # tflint-ignore: terraform_unused_declarations
   validate_auth_inputs = !var.skip_scc_cos_auth_policy && var.existing_cos_instance_crn == null && var.existing_scc_cos_bucket_name != null ? tobool("A value must be passed for 'existing_cos_instance_crn' in order to create auth policy.") : true
   # tflint-ignore: terraform_unused_declarations
   validate_en_integration = var.existing_en_crn != null && var.en_source_name == null ? tobool("When passing a value for 'existing_en_crn', a value must also be passed for 'en_source_name'.") : false
@@ -36,7 +38,7 @@ module "existing_kms_crn_parser" {
 }
 
 module "existing_kms_key_crn_parser" {
-  count   = var.existing_scc_cos_kms_key_crn != null || var.existing_kms_instance_crn != null ? 1 : 0
+  count   = var.existing_scc_cos_kms_key_crn != null || local.use_kms_module ? 1 : 0
   source  = "terraform-ibm-modules/common-utilities/ibm//modules/crn-parser"
   version = "1.1.0"
   crn     = var.existing_scc_cos_kms_key_crn != null ? var.existing_scc_cos_kms_key_crn : module.kms[0].keys[format("%s.%s", local.scc_cos_key_ring_name, local.scc_cos_key_name)].crn
@@ -57,9 +59,13 @@ locals {
   scc_instance_name                         = try("${local.prefix}-${var.scc_instance_name}", var.scc_instance_name)
   scc_workload_protection_instance_name     = try("${local.prefix}-${var.scc_workload_protection_instance_name}", var.scc_workload_protection_instance_name)
   scc_workload_protection_resource_key_name = try("${local.prefix}-${var.scc_workload_protection_instance_name}-key", "${var.scc_workload_protection_instance_name}-key")
-  scc_cos_bucket_name                       = try("${local.prefix}-${var.scc_cos_bucket_name}", var.scc_cos_bucket_name)
+  # bucket name to be passed to the COS module to create a bucket
+  created_scc_cos_bucket_name = try("${local.prefix}-${var.scc_cos_bucket_name}", var.scc_cos_bucket_name)
+  # Final COS bucket name - either passed in or after being created by COS
+  scc_cos_bucket_name = var.existing_scc_cos_bucket_name != null ? var.existing_scc_cos_bucket_name : local.create_cross_account_auth_policy ? module.buckets[0].buckets[local.created_scc_cos_bucket_name].bucket_name : module.cos[0].buckets[local.created_scc_cos_bucket_name].bucket_name
 
   create_cross_account_auth_policy = !var.skip_cos_kms_auth_policy && var.ibmcloud_kms_api_key == null ? false : (data.ibm_iam_account_settings.iam_account_settings.account_id != module.existing_kms_crn_parser[0].account_id)
+  use_kms_module                   = !(var.existing_scc_cos_kms_key_crn != null || var.existing_scc_cos_bucket_name != null || var.existing_scc_instance_crn != null)
 }
 
 # Create IAM Authorization Policy to allow COS to access KMS for the encryption key, if cross account KMS is passed in
@@ -115,9 +121,9 @@ module "kms" {
   providers = {
     ibm = ibm.kms
   }
-  count                       = var.existing_scc_cos_kms_key_crn != null || var.existing_scc_cos_bucket_name != null || var.existing_scc_instance_crn != null ? 0 : 1 # no need to create any KMS resources if passing an existing key or bucket, or SCC instance
+  count                       = local.use_kms_module ? 1 : 0 # no need to create any KMS resources if passing an existing key or bucket, or SCC instance
   source                      = "terraform-ibm-modules/kms-all-inclusive/ibm"
-  version                     = "4.16.11"
+  version                     = "4.19.8"
   create_key_protect_instance = false
   region                      = local.kms_region
   existing_kms_instance_crn   = var.existing_kms_instance_crn
@@ -154,12 +160,11 @@ module "existing_cos_crn_parser" {
 locals {
   scc_cos_kms_key_crn = var.existing_scc_instance_crn == null ? var.existing_scc_cos_bucket_name != null ? null : var.existing_scc_cos_kms_key_crn != null ? var.existing_scc_cos_kms_key_crn : module.kms[0].keys[format("%s.%s", local.scc_cos_key_ring_name, local.scc_cos_key_name)].crn : null
   cos_instance_crn    = var.existing_scc_instance_crn == null ? var.existing_cos_instance_crn != null ? var.existing_cos_instance_crn : module.cos[0].cos_instance_crn : null
-  cos_bucket_name     = var.existing_scc_instance_crn == null ? var.existing_scc_cos_bucket_name != null ? var.existing_scc_cos_bucket_name : local.create_cross_account_auth_policy ? module.buckets[0].buckets[local.scc_cos_bucket_name].bucket_name : module.cos[0].buckets[local.scc_cos_bucket_name].bucket_name : null
   cos_instance_guid   = var.existing_scc_instance_crn == null ? var.existing_cos_instance_crn != null ? module.existing_cos_crn_parser[0].service_instance : module.cos[0].cos_instance_guid : null
   bucket_config = [{
     access_tags                   = var.scc_cos_bucket_access_tags
     add_bucket_name_suffix        = var.add_bucket_name_suffix
-    bucket_name                   = local.scc_cos_bucket_name
+    bucket_name                   = local.created_scc_cos_bucket_name
     kms_encryption_enabled        = true
     kms_guid                      = local.existing_kms_guid
     kms_key_crn                   = local.scc_cos_kms_key_crn
@@ -170,10 +175,9 @@ locals {
     region_location               = var.cos_region
     force_delete                  = true
     activity_tracking = {
-      read_data_events     = true
-      write_data_events    = true
-      management_events    = true
-      activity_tracker_crn = var.existing_activity_tracker_crn
+      read_data_events  = true
+      write_data_events = true
+      management_events = true
     }
     metrics_monitoring = {
       usage_metrics_enabled   = true
@@ -189,7 +193,7 @@ module "cos" {
   }
   count                    = var.existing_scc_cos_bucket_name == null && var.existing_scc_instance_crn == null ? 1 : 0 # no need to call COS module if consumer is passing existing SCC instance or COS bucket
   source                   = "terraform-ibm-modules/cos/ibm//modules/fscloud"
-  version                  = "8.15.1"
+  version                  = "8.19.3"
   resource_group_id        = module.resource_group.resource_group_id
   create_cos_instance      = var.existing_cos_instance_crn == null ? true : false # don't create instance if existing one passed in
   cos_instance_name        = local.cos_instance_name
@@ -208,7 +212,7 @@ module "buckets" {
   count          = local.create_cross_account_auth_policy ? 1 : 0
   depends_on     = [time_sleep.wait_for_authorization_policy[0]]
   source         = "terraform-ibm-modules/cos/ibm//modules/buckets"
-  version        = "8.15.1"
+  version        = "8.19.3"
   bucket_configs = local.bucket_config
 }
 
@@ -236,12 +240,12 @@ moved {
 module "scc" {
   source                            = "terraform-ibm-modules/scc/ibm"
   existing_scc_instance_crn         = var.existing_scc_instance_crn
-  version                           = "1.8.23"
+  version                           = "1.10.0"
   resource_group_id                 = module.resource_group.resource_group_id
   region                            = local.scc_instance_region
   instance_name                     = local.scc_instance_name
   plan                              = var.scc_service_plan
-  cos_bucket                        = local.cos_bucket_name
+  cos_bucket                        = local.scc_cos_bucket_name
   cos_instance_crn                  = local.cos_instance_crn
   en_instance_crn                   = var.existing_en_crn
   en_source_name                    = var.en_source_name
@@ -251,6 +255,7 @@ module "scc" {
   attach_wp_to_scc_instance         = var.provision_scc_workload_protection && var.existing_scc_instance_crn == null
   wp_instance_crn                   = var.provision_scc_workload_protection && var.existing_scc_instance_crn == null ? module.scc_wp[0].crn : null
   skip_scc_wp_auth_policy           = var.skip_scc_workload_protection_auth_policy
+  cbr_rules                         = var.cbr_rules
 }
 
 #######################################################################################################################
@@ -303,7 +308,7 @@ data "ibm_iam_account_settings" "iam_account_settings" {}
 
 module "create_profile_attachment" {
   source  = "terraform-ibm-modules/scc/ibm//modules/attachment"
-  version = "1.8.23"
+  version = "1.10.0"
   for_each = {
     for idx, profile_attachment in var.profile_attachments :
     profile_attachment => idx
@@ -324,7 +329,7 @@ module "create_profile_attachment" {
 module "scc_wp" {
   count                         = var.provision_scc_workload_protection && var.existing_scc_instance_crn == null ? 1 : 0
   source                        = "terraform-ibm-modules/scc-workload-protection/ibm"
-  version                       = "1.4.2"
+  version                       = "1.4.3"
   name                          = local.scc_workload_protection_instance_name
   region                        = var.scc_region
   resource_group_id             = module.resource_group.resource_group_id
@@ -350,10 +355,12 @@ module "existing_en_crn_parser" {
 locals {
   existing_en_guid      = var.existing_en_crn != null ? module.existing_en_crn_parser[0].service_instance : null
   en_topic              = try("${local.prefix}-SCC Topic", "SCC Topic")
+  existing_en_region    = var.existing_en_crn != null ? module.existing_en_crn_parser[0].region : null
   en_subscription_email = try("${local.prefix}-Email for Security and Compliance Center Subscription", "Email for Security and Compliance Center Subscription")
 }
 
 data "ibm_en_destinations" "en_destinations" {
+  provider      = ibm.en
   count         = var.existing_en_crn != null ? 1 : 0
   instance_guid = local.existing_en_guid
 }
@@ -366,6 +373,7 @@ resource "time_sleep" "wait_for_scc" {
 }
 
 resource "ibm_en_topic" "en_topic" {
+  provider      = ibm.en
   count         = var.existing_en_crn != null && var.existing_scc_instance_crn == null ? 1 : 0
   depends_on    = [time_sleep.wait_for_scc]
   instance_guid = local.existing_en_guid
@@ -381,6 +389,7 @@ resource "ibm_en_topic" "en_topic" {
 }
 
 resource "ibm_en_subscription_email" "email_subscription" {
+  provider       = ibm.en
   count          = var.existing_en_crn != null && var.existing_scc_instance_crn == null && length(var.scc_en_email_list) > 0 ? 1 : 0
   instance_guid  = local.existing_en_guid
   name           = local.en_subscription_email
