@@ -57,7 +57,6 @@ variable "provider_visibility" {
 
 variable "existing_kms_instance_crn" {
   type        = string
-  default     = null
   description = "The CRN of the existing KMS instance (Hyper Protect Crypto Services or Key Protect). If the KMS instance is in different account you must also provide a value for `ibmcloud_kms_api_key`."
 }
 
