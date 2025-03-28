@@ -98,7 +98,8 @@
             },
             {
               "key": "existing_kms_instance_crn",
-              "required": true
+              "required": true,
+              "description": "REQUIRED INPUT: Either `existing_kms_instance_crn` OR `existing_cos_instance_crn` and `existing_scc_cos_bucket_name`."
             },
             {
               "key": "existing_scc_instance_crn",
@@ -194,11 +195,13 @@
             },
             {
               "key": "existing_cos_instance_crn",
-              "required": false
+              "required": true,
+              "description": "REQUIRED INPUT: Either `existing_kms_instance_crn` OR `existing_cos_instance_crn` and `existing_scc_cos_bucket_name`."
             },
             {
               "key": "existing_scc_cos_bucket_name",
-              "required": false
+              "required": true,
+              "description": "REQUIRED INPUT: Either `existing_kms_instance_crn` OR `existing_cos_instance_crn` and `existing_scc_cos_bucket_name`."
             },
             {
               "key": "skip_cos_kms_auth_policy",
