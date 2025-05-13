@@ -396,7 +396,6 @@
             }
           ],
           "architecture": {
-            "descriptions": "This architecture supports creating and configuring a Security and Compliance Center Workload Protection instance.",
             "features": [
               {
                 "title": "Creates a Security and Compliance Center instance",
